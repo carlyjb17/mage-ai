@@ -20,10 +20,10 @@ import asyncio
 import logging
 import os
 
+MAX_NUM_OF_ROWS = 100_000
 RESERVED_VARIABLE_NAMES = frozenset(
     [BlockType.DATA_LOADER, BlockType.TRANSFORMER, BlockType.DATA_EXPORTER]
 )
-MAX_NUM_OF_ROWS = 100_000
 
 logger = logging.getLogger(__name__)
 
