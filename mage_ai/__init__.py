@@ -95,6 +95,7 @@ def connect_data(df, name, verbose=False):
         feature_set, _ = connect_df(df, name, verbose=verbose)
     return feature_set
 
+
 def clean(
     df,
     name=None,
@@ -116,10 +117,11 @@ def clean(
         _, df_clean = clean_df(df, name=name, verbose=verbose)
     return df_clean
 
+
 ### --------------- Data preparation methods --------------- ###
 
-def run(pipeline_uuid: str, repo_name: str = None) -> None:
+
+def run(pipeline_uuid: str, repo_name: str = None, **kwargs) -> None:
     repo_path = os.getcwd() if repo_name is None else os.path.join(os.getcwd(), repo_name)
     pipeline = Pipeline(pipeline_uuid, repo_path)
-
-    asyncio.run(pipeline.execute())
+    asyncio.run(pipeline.execute(runtime_vars=kwargs))

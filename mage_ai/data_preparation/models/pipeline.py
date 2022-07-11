@@ -83,7 +83,9 @@ class Pipeline:
             return True
         return len(self.blocks_by_uuid[block.uuid].downstream_blocks) == 0
 
-    async def execute(self, analyze_outputs=True, run_all_blocks=False, redirect_outputs=False):
+    async def execute(
+        self, analyze_outputs=True, run_all_blocks=False, redirect_outputs=False, runtime_vars=None
+    ):
         """
         Async function for parallel processing
         This function will schedule the block execution in topological
@@ -109,7 +111,11 @@ class Pipeline:
                 continue
             await asyncio.gather(*[tasks[u.uuid] for u in block.upstream_blocks])
             task = asyncio.create_task(
-                block.execute(analyze_outputs=analyze_outputs, redirect_outputs=redirect_outputs)
+                block.execute(
+                    analyze_outputs=analyze_outputs,
+                    redirect_outputs=redirect_outputs,
+                    runtime_vars=runtime_vars,
+                )
             )
             tasks[block.uuid] = task
             for downstream_block in block.downstream_blocks:

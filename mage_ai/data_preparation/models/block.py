@@ -135,6 +135,7 @@ class Block:
         used, throw error. Otherwise, delete the block files.
         """
         from mage_ai.data_preparation.models.pipeline import Pipeline
+
         if self.pipeline is not None:
             self.pipeline.delete_block(self)
             # For block_type SCRATCHPAD, also delete the file if possible
@@ -155,10 +156,14 @@ class Block:
             p.delete_block(p.get_block(self.uuid))
         os.remove(self.file_path)
 
-    def execute_sync(self, analyze_outputs=True, custom_code=None, redirect_outputs=False):
+    def execute_sync(
+        self, analyze_outputs=True, custom_code=None, redirect_outputs=False, runtime_vars=None
+    ):
         try:
             output = self.execute_block(
-                custom_code=custom_code, redirect_outputs=redirect_outputs
+                custom_code=custom_code,
+                redirect_outputs=redirect_outputs,
+                runtime_vars=runtime_vars,
             )
             block_output = output['output']
             self.__verify_outputs(block_output)
@@ -174,12 +179,15 @@ class Block:
             self.__update_pipeline_block()
         return output
 
-    async def execute(self, analyze_outputs=True, custom_code=None, redirect_outputs=False):
+    async def execute(
+        self, analyze_outputs=True, custom_code=None, redirect_outputs=False, runtime_vars=None
+    ):
         with VerboseFunctionExec(f'Executing {self.type} block: {self.uuid}'):
             return self.execute_sync(
                 analyze_outputs=analyze_outputs,
                 custom_code=custom_code,
                 redirect_outputs=redirect_outputs,
+                runtime_vars=runtime_vars,
             )
 
     def __validate_execution(self, decorated_functions, input_vars):
@@ -243,7 +251,10 @@ class Block:
 
             return block_function
 
-    def execute_block(self, custom_code=None, redirect_outputs=False):
+    def execute_block(self, custom_code=None, redirect_outputs=False, runtime_vars=None):
+        if runtime_vars is None:
+            runtime_vars = {}
+
         def block_decorator(decorated_functions):
             def custom_code(function):
                 decorated_functions.append(function)
@@ -266,12 +277,17 @@ class Block:
         outputs = []
         decorated_functions = []
         stdout = StringIO() if redirect_outputs else sys.stdout
+        if self.type in runtime_vars:
+            raise ValueError(
+                f'Cannot use reserved variable name \'{self.type}\' in block of type \'{self.type}\''
+            )
+        runtime_vars[self.type] = block_decorator(decorated_functions)
         with redirect_stdout(stdout):
             if custom_code is not None:
-                exec(custom_code, {self.type: block_decorator(decorated_functions)})
+                exec(custom_code, runtime_vars)
             elif os.path.exists(self.file_path):
                 with open(self.file_path) as file:
-                    exec(file.read(), {self.type: block_decorator(decorated_functions)})
+                    exec(file.read(), runtime_vars)
             block_function = self.__validate_execution(decorated_functions, input_vars)
             if block_function is not None:
                 outputs = block_function(*input_vars)
