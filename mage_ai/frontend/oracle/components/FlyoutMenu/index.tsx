@@ -34,6 +34,7 @@ type FlyoutMenuProps = {
   onClickCallback?: () => void;
   open: boolean;
   parentRef: any;
+  topOffset?: number;
   uuid: string;
   width?: number;
 };
@@ -44,6 +45,7 @@ function FlyoutMenu({
   onClickCallback,
   open,
   parentRef,
+  topOffset = 0,
   uuid: uuidKeyboard,
   width,
 }: FlyoutMenuProps) {
@@ -110,7 +112,7 @@ function FlyoutMenu({
       style={{
         display: !open ? 'none' : null,
         left: left || 0,
-        top: height,
+        top: (height || 0) + topOffset,
       }}
       width={width}
     >
