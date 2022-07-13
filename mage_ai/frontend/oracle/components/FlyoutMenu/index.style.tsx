@@ -7,9 +7,14 @@ type LinkProps = {
   highlighted: boolean;
 };
 
-export const FlyoutMenuContainerStyle = styled.div`
+export const FlyoutMenuContainerStyle = styled.div<{ width: number}>`
   position: absolute;
   min-width: ${UNIT * 34}px;
+
+  ${props => props.width && `
+    min-width: 0px;
+    width: ${props.width}px;
+  `}
 
   ${props => `
     box-shadow: ${(props.theme.shadow || dark.shadow).popup};
@@ -18,6 +23,7 @@ export const FlyoutMenuContainerStyle = styled.div`
       background-color: ${(props.theme.interactive || dark.interactive).hoverBackground};
     }
   `}
+
 `;
 
 export const LinkStyle = styled.div<LinkProps>`

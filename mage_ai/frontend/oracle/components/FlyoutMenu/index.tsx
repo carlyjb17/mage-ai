@@ -30,18 +30,22 @@ export type FlyoutMenuItemType = {
 
 type FlyoutMenuProps = {
   items: FlyoutMenuItemType[];
+  left?: number;
   onClickCallback?: () => void;
   open: boolean;
   parentRef: any;
   uuid: string;
+  width?: number;
 };
 
 function FlyoutMenu({
   items,
+  left,
   onClickCallback,
   open,
   parentRef,
   uuid: uuidKeyboard,
+  width,
 }: FlyoutMenuProps) {
   const [highlightedIndices, setHighlightedIndices] = useState<number[]>([]);
   const {
@@ -105,9 +109,10 @@ function FlyoutMenu({
     <FlyoutMenuContainerStyle
       style={{
         display: !open ? 'none' : null,
-        left: 0,
+        left: left || 0,
         top: height,
       }}
+      width={width}
     >
       {items.map(({
         keyTextGroups,
