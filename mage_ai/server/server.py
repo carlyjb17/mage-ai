@@ -23,7 +23,10 @@ import urllib.parse
 
 
 session = Session(key=bytes())
-manager = KernelManager(session=session)
+manager = KernelManager(
+    session=session,
+    kernel_name='pysparkkernel',
+)
 
 
 class BaseHandler(tornado.web.RequestHandler):
