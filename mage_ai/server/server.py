@@ -424,7 +424,12 @@ async def main(
             return s.connect_ex(('localhost', port)) == 0
 
     port = 6789
-    while is_port_in_use(port) and port < 7000:
+    while is_port_in_use(port):
+        if port > 6889:
+            raise Exception(
+                'Unable to find an open port between 6789 and 6889, '
+                'please clear your running processes if possible.'
+            )
         port += 1
 
     app.listen(
